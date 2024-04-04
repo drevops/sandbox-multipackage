@@ -25,6 +25,9 @@ use Composer\Util\Filesystem;
  * a dev dependency so that the DrevOps Scaffold files could be managed by the
  * core-composer-scaffold plugin.
  *
+ * @todo Subscribe to the `post-root-package-install` event once
+ * https://github.com/composer/composer/issues/11919 is fixed.
+ *
  * @see https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold
  */
 class InitializerPlugin implements PluginInterface {

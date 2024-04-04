@@ -1,6 +1,6 @@
 {
-    "name": "drevops/installer",
-    "description": "DrevOps Scaffold installer",
+    "name": "drevops/customizer",
+    "description": "DrevOps Scaffold customizer",
     "type": "composer-plugin",
     "authors": [
         {
@@ -24,10 +24,11 @@
     },
     "autoload": {
         "psr-4": {
-            "DrevOps\\Composer\\Plugin\\Installer\\": "src"
+            "DrevOps\\Composer\\Plugin\\Customizer\\": "src/Composer",
+            "DrevOps\\Customizer\\": "src"
         }
     },
     "extra": {
-        "class": "DrevOps\\Composer\\Plugin\\Installer\\Plugin"
+        "class": "DrevOps\\Composer\\Plugin\\Customizer\\DrupalScaffoldIntegrationPlugin"
     }
 }

@@ -10,7 +10,7 @@
   "repositories": [
     {
       "type": "path",
-      "url": "../../installer",
+      "url": "../../customizer",
       "options": {
         "symlink": false
       }
@@ -40,7 +40,7 @@
     "drupal/core-composer-scaffold": "11.x-dev"
   },
   "require-dev": {
-    "drevops/installer": "@dev"
+    "drevops/customizer": "@dev"
   },
   "conflict": {
     "drupal/drupal": "*"
@@ -79,7 +79,7 @@
   "config": {
     "allow-plugins": {
       "drupal/core-composer-scaffold": true,
-      "drevops/installer": true
+      "drevops/customizer": true
     }
   },
   "scripts": {

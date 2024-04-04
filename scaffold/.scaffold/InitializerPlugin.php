@@ -1,6 +1,6 @@
 <?php
 
-namespace DrevOps\Composer\Plugin\Initializer;
+namespace DrevOps\Composer\Plugin\Scaffold;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
@@ -94,14 +94,14 @@ class InitializerPlugin implements PluginInterface {
     }
 
     // Remove this plugin and all references to it.
-    unset($json['autoload']['psr-4']['DrevOps\\Composer\\Plugin\\Initializer\\']);
+    unset($json['autoload']['psr-4']['DrevOps\\Composer\\Plugin\\Scaffold\\']);
     if (empty($json['autoload']['psr-4'])) {
       unset($json['autoload']['psr-4']);
       if (empty($json['autoload'])) {
         unset($json['autoload']);
       }
     }
-    unset($json['scripts']['post-root-package-install'][array_search('DrevOps\\Composer\\Plugin\\Initializer\\InitializerPlugin::postRootPackageInstall', $json['scripts']['post-root-package-install'])]);
+    unset($json['scripts']['post-root-package-install'][array_search('DrevOps\\Composer\\Plugin\\Scaffold\\InitializerPlugin::postRootPackageInstall', $json['scripts']['post-root-package-install'])]);
     if (empty($json['scripts']['post-root-package-install'])) {
       unset($json['scripts']['post-root-package-install']);
       if (empty($json['scripts'])) {

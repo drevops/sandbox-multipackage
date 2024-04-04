@@ -49,7 +49,7 @@
   "prefer-stable": true,
   "autoload": {
     "psr-4": {
-      "DrevOps\\Composer\\Plugin\\Initializer\\": ".scaffold"
+      "DrevOps\\Composer\\Plugin\\Scaffold\\": ".scaffold"
     }
   },
   "extra": {
@@ -84,7 +84,7 @@
   },
   "scripts": {
     "post-root-package-install": [
-      "DrevOps\\Composer\\Plugin\\Initializer\\InitializerPlugin::postRootPackageInstall"
+      "DrevOps\\Composer\\Plugin\\Scaffold\\InitializerPlugin::postRootPackageInstall"
     ]
   }
 }

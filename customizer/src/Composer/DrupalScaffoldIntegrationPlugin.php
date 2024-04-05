@@ -49,16 +49,10 @@ class DrupalScaffoldIntegrationPlugin implements PluginInterface, EventSubscribe
   }
 
   public function preDrupalScaffoldCmd(Event $event) {
-    print 'CUSTOMIZER - EVENT - ' . $event->getName();
-    print PHP_EOL;
-
     $this->customizer->assess();
   }
 
   public function postDrupalScaffoldCmd(Event $event) {
-    print 'CUSTOMIZER - EVENT - ' . $event->getName();
-    print PHP_EOL;
-
     $this->customizer->process();
   }
 

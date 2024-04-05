@@ -70,11 +70,9 @@
         "[web-root]/web.config": false,
         "[project-root]/.circleci/config.yml": ".circleci/config.yml",
         "[project-root]/myfile1.txt": "myfile1.txt"
-      },
-      "allowed-packages": [
-        "drevops/scaffold"
-      ]
-    }
+      }
+    },
+    "patches": {}
   },
   "config": {
     "allow-plugins": {

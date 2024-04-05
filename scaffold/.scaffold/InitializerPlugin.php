@@ -37,7 +37,7 @@ class InitializerPlugin implements PluginInterface {
    *
    * @var string
    */
-  const DREVOPS_SCAFFOLD_VERSION = '^1';
+  const DREVOPS_SCAFFOLD_VERSION = '1';
 
   /**
    * Generic project name.
@@ -80,14 +80,18 @@ class InitializerPlugin implements PluginInterface {
     $path = getcwd() . '/composer.json';
     $json = json_decode(file_get_contents($path), TRUE);
 
-    // Add 'drevops/scaffold' as a dev dependency.
-    $json['require-dev']['drevops/scaffold'] = getenv('DREVOPS_SCAFFOLD_VERSION') ?: self::DREVOPS_SCAFFOLD_VERSION;
-    $json['config']['allow-plugins']['drevops/scaffold'] = TRUE;
+    $name = $json['name'];
 
     // Change the project name to a generic value. The `drevops/scaffold` name
     // was used to distribute the scaffold itself as a package. The consumer
     // site's 'name' in composer.json should have a generic value.
     $json['name'] = self::PROJECT_NAME;
+    self::arrayUpsert($json, isset($json['description']) ? 'description' : 'name', 'type', 'project');
+    self::arrayUpsert($json, 'type', 'license', 'proprietary');
+
+    // Add the package itself as a dev dependency.
+    $json['require-dev'][$name] = getenv('DREVOPS_SCAFFOLD_VERSION') ?: '^' . ($json['version'] ?? self::DREVOPS_SCAFFOLD_VERSION);
+    $json['config']['allow-plugins'][$name] = TRUE;
 
     // Remove Scaffold's file mappings. Consumer site's can still add these
     // mappings if they want to prevent Scaffold from updating them.
@@ -95,30 +99,87 @@ class InitializerPlugin implements PluginInterface {
     foreach (self::SCAFFOLD_FILE_MAPPINGS as $file) {
       unset($json['extra']['drupal-scaffold']['file-mapping'][$file]);
     }
+    $json['extra']['drupal-scaffold']['allowed-packages'][] = $name;
 
     // Remove this plugin and all references to it.
-    unset($json['autoload']['psr-4']['DrevOps\\Composer\\Plugin\\Scaffold\\']);
-    if (empty($json['autoload']['psr-4'])) {
-      unset($json['autoload']['psr-4']);
-      if (empty($json['autoload'])) {
-        unset($json['autoload']);
-      }
-    }
-    unset($json['scripts']['post-root-package-install'][array_search('DrevOps\\Composer\\Plugin\\Scaffold\\InitializerPlugin::postRootPackageInstall', $json['scripts']['post-root-package-install'])]);
-    if (empty($json['scripts']['post-root-package-install'])) {
-      unset($json['scripts']['post-root-package-install']);
-      if (empty($json['scripts'])) {
-        unset($json['scripts']);
-      }
-    }
+    unset($json['version']);
+    unset($json['authors']);
+
+    unset($json['autoload']['psr-4'][__NAMESPACE__ . '\\']);
+    self::arrayRemoveEmpty($json, 'autoload');
+
+    unset($json['scripts']['post-root-package-install'][array_search(__METHOD__, $json['scripts']['post-root-package-install'])]);
+    self::arrayRemoveEmpty($json, 'scripts');
+
     $fs = new Filesystem();
     $fs->removeDirectory(getcwd() . '/.scaffold');
 
+    // Preserve format of the 'patches' section.
+    if (isset($json['extra']['patches']) && count($json['extra']['patches']) === 0) {
+      $json['extra']['patches'] = (object) $json['extra']['patches'];
+    }
+
+    // Write the updated composer.json file.
     file_put_contents($path, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
     $event->getIO()->write('<info>Initialised project from DrevOps Scaffold</info>');
     if (in_array('--no-install', $_SERVER['argv'])) {
       $event->getIO()->write('<comment>Run `composer install` to further customise the project</comment>');
+    }
+  }
+
+  /**
+   * Insert a value into an array after a specific key.
+   *
+   * For existing keys with array values, the passed value will be merged
+   * with these existing values.
+   */
+  protected static function arrayUpsert(&$array, $after, $key, $value) {
+    $keys = array_keys($array);
+    $position = array_search($after, $keys);
+
+    if (array_key_exists($key, $array) && is_array($array[$key])) {
+      $array[$key] = array_merge($array[$key], is_array($value) ? $value : [$value]);
+    }
+    else {
+      $insert = [$key => $value];
+      if ($position === FALSE) {
+        $array = array_merge($array, $insert);
+      }
+      else {
+        $position++;
+        $array = array_merge(
+          array_slice($array, 0, $position, TRUE),
+          $insert,
+          array_slice($array, $position, NULL, TRUE)
+        );
+      }
+    }
+  }
+
+  /**
+   * Remove empty values from an array.
+   */
+  protected static function arrayRemoveEmpty(array &$array, $key = NULL) {
+    $keys = $key !== NULL && isset($array[$key]) ? [$key] : array_keys($array);
+
+    foreach ($keys as $k) {
+      if (is_array($array[$k])) {
+        foreach ($array[$k] as $kk => $value) {
+          if (is_array($value)) {
+            self::arrayRemoveEmpty($array[$k][$kk]);
+          }
+          if (empty($array[$k][$kk])) {
+            unset($array[$k][$kk]);
+          }
+        }
+        if (empty($array[$k])) {
+          unset($array[$k]);
+        }
+      }
+      elseif (empty($array[$k])) {
+        unset($array[$k]);
+      }
     }
   }
 

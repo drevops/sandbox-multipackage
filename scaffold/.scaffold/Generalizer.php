@@ -9,7 +9,7 @@ use Composer\Script\Event;
 use Composer\Util\Filesystem;
 
 /**
- * Composer plugin for handling project initialization.
+ * Composer plugin for making the project generic.
  *
  * DrevOps Scaffold project is used both as a project template, for initial
  * setup with `composer create-project`, and a dependency package that provides
@@ -21,7 +21,7 @@ use Composer\Util\Filesystem;
  * installing any dependencies (`composer create --no-install`).
  *
  * It is used only once, right after the project is created, and then it removes
- * itself from the project dependencies. `drevops/scaffold` is then added as
+ * itself from the project dependencies. The project itself is then added as
  * a dev dependency so that the DrevOps Scaffold files could be managed by the
  * core-composer-scaffold plugin.
  *
@@ -30,7 +30,7 @@ use Composer\Util\Filesystem;
  *
  * @see https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold
  */
-class InitializerPlugin implements PluginInterface {
+class Generalizer implements PluginInterface {
 
   /**
    * DrevOps Scaffold version.
@@ -76,7 +76,7 @@ class InitializerPlugin implements PluginInterface {
   /**
    * Update the project root package.
    */
-  public static function postRootPackageInstall(Event $event): void {
+  public static function process(Event $event): void {
     $path = getcwd() . '/composer.json';
     $json = json_decode(file_get_contents($path), TRUE);
 

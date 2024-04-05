@@ -1,88 +1,88 @@
 {
-  "name": "drevops/scaffold",
-  "version": "1.10.2",
-  "authors": [
-    {
-      "name": "Alex Skrypnyk",
-      "email": "alex@drevops.com"
+    "name": "drevops/scaffold",
+    "version": "1.10.2",
+    "authors": [
+        {
+            "name": "Alex Skrypnyk",
+            "email": "alex@drevops.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../customizer",
+            "options": {
+                "symlink": false
+            }
+        },
+        {
+            "type": "path",
+            "url": "../../scaffold",
+            "options": {
+                "symlink": false
+            }
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/drevops/core-composer-scaffold"
+        },
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        },
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "drupal/core-composer-scaffold": "11.x-dev"
+    },
+    "require-dev": {
+        "drevops/customizer": "@dev"
+    },
+    "conflict": {
+        "drupal/drupal": "*"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "DrevOps\\Composer\\Plugin\\Scaffold\\": ".scaffold"
+        }
+    },
+    "extra": {
+        "drupal-scaffold": {
+            "locations": {
+                "web-root": "web/"
+            },
+            "file-mapping": {
+                "[project-root]/.editorconfig": false,
+                "[project-root]/.gitattributes": false,
+                "[web-root]/.htaccess": false,
+                "[web-root]/.ht.router.php": false,
+                "[web-root]/example.gitignore": false,
+                "[web-root]/INSTALL.txt": false,
+                "[web-root]/README.txt": false,
+                "[web-root]/sites/example.settings.local.php": false,
+                "[web-root]/sites/example.sites.php": false,
+                "[web-root]/web.config": false,
+                "[project-root]/.circleci/config.yml": ".circleci/config.yml",
+                "[project-root]/myfile1.txt": "myfile1.txt"
+            }
+        },
+        "patches": {}
+    },
+    "config": {
+        "allow-plugins": {
+            "drupal/core-composer-scaffold": true,
+            "drevops/customizer": true
+        }
+    },
+    "scripts": {
+        "post-root-package-install": [
+            "DrevOps\\Composer\\Plugin\\Scaffold\\InitializerPlugin::postRootPackageInstall"
+        ]
     }
-  ],
-  "repositories": [
-    {
-      "type": "path",
-      "url": "../../customizer",
-      "options": {
-        "symlink": false
-      }
-    },
-    {
-      "type": "path",
-      "url": "../../scaffold",
-      "options": {
-        "symlink": false
-      }
-    },
-    {
-      "type": "vcs",
-      "url": "https://github.com/drevops/core-composer-scaffold"
-    },
-    {
-      "type": "composer",
-      "url": "https://packages.drupal.org/8"
-    },
-    {
-      "type": "composer",
-      "url": "https://asset-packagist.org"
-    }
-  ],
-  "require": {
-    "php": ">=8.2",
-    "drupal/core-composer-scaffold": "11.x-dev"
-  },
-  "require-dev": {
-    "drevops/customizer": "@dev"
-  },
-  "conflict": {
-    "drupal/drupal": "*"
-  },
-  "minimum-stability": "dev",
-  "prefer-stable": true,
-  "autoload": {
-    "psr-4": {
-      "DrevOps\\Composer\\Plugin\\Scaffold\\": ".scaffold"
-    }
-  },
-  "extra": {
-    "drupal-scaffold": {
-      "locations": {
-        "web-root": "web/"
-      },
-      "file-mapping": {
-        "[project-root]/.editorconfig": false,
-        "[project-root]/.gitattributes": false,
-        "[web-root]/.htaccess": false,
-        "[web-root]/.ht.router.php": false,
-        "[web-root]/example.gitignore": false,
-        "[web-root]/INSTALL.txt": false,
-        "[web-root]/README.txt": false,
-        "[web-root]/sites/example.settings.local.php": false,
-        "[web-root]/sites/example.sites.php": false,
-        "[web-root]/web.config": false,
-        "[project-root]/.circleci/config.yml": ".circleci/config.yml",
-        "[project-root]/myfile1.txt": "myfile1.txt"
-      }
-    },
-    "patches": {}
-  },
-  "config": {
-    "allow-plugins": {
-      "drupal/core-composer-scaffold": true,
-      "drevops/customizer": true
-    }
-  },
-  "scripts": {
-    "post-root-package-install": [
-      "DrevOps\\Composer\\Plugin\\Scaffold\\InitializerPlugin::postRootPackageInstall"
-    ]
-  }
 }

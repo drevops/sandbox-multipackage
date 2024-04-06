@@ -138,7 +138,7 @@ class ScaffoldHandler {
       // Composer configuration.
       $package = $event->getComposer()->getPackage();
       $scripts = $event->getComposer()->getPackage()->getScripts();
-      $scripts['post-create-project-cmd'][] = __CLASS__ . '::requireScaffold';
+      $scripts['post-create-project-cmd'][] = __CLASS__ . '::postCreateProjectCmd';
       $package->setScripts($scripts);
     }
     else {
@@ -170,7 +170,7 @@ class ScaffoldHandler {
   /**
    * Require the DrevOps Scaffold package.
    */
-  public static function requireScaffold(Event $event): void {
+  public static function postCreateProjectCmd(Event $event): void {
     $ansi = $event->getIO()->isDecorated() ? '--ansi' : '--no-ansi';
     $cmd = 'composer require --no-interaction --dev ' . $ansi . ' ' . static::DREVOPS_SCAFFOLD_NAME . ':' . static::getVersion();
     passthru($cmd, $status);

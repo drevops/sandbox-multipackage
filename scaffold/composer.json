@@ -1,5 +1,6 @@
 {
     "name": "drevops/scaffold",
+    "description": "Drupal project scaffold",
     "authors": [
         {
             "name": "Alex Skrypnyk",

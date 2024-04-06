@@ -53,11 +53,21 @@ class ScaffoldHandler {
    * Generic project name.
    *
    * This name is used for the consumer project's composer.json. Also, it aligns
-   * with other similar generic values in the DrevOps scaffold.
+   * with other similar generic values in the DrevOps Scaffold.
    *
    * @var string
    */
   const PROJECT_NAME = 'your_org/your_site';
+
+  /**
+   * Generic project description.
+   *
+   * This description is used for the consumer project's composer.json. Also,
+   * it aligns with other similar generic values in the DrevOps Scaffold.
+   *
+   * @var string
+   */
+  const PROJECT_DESCRIPTION = 'Drupal implementation of YOURSITE for YOURORG';
 
   /**
    * Scaffold file mappings managed by the DrevOps Scaffold.
@@ -91,12 +101,13 @@ class ScaffoldHandler {
     $json = json_decode(file_get_contents($path), TRUE);
 
     // Change the project properties to generic values.
-    // The current 'name' property in composer.json is used to distribute the
-    // package via the registry. The 'name', 'type' and
-    // 'license' properties in consumer project's composer.json should have
-    // generic values.
+    // The current 'name' and 'description' properties in composer.json are used
+    // to distribute the package via the registry. The 'name', 'description',
+    // 'type' and 'license' properties in consumer project's composer.json
+    // should have generic values.
     $json['name'] = self::PROJECT_NAME;
-    self::arrayUpsert($json, isset($json['description']) ? 'description' : 'name', 'type', 'project');
+    $json['description'] = self::PROJECT_DESCRIPTION;
+    self::arrayUpsert($json, 'description', 'type', 'project');
     self::arrayUpsert($json, 'type', 'license', 'proprietary');
     // The consumer project should not have a 'version' as it is not distributed
     // as a package.

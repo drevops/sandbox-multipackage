@@ -49,7 +49,7 @@
     "prefer-stable": true,
     "autoload": {
         "classmap": [
-            "scripts/composer/ScaffoldHandler.php"
+            "scripts/composer/ScaffoldScriptHandler.php"
         ]
     },
     "extra": {
@@ -82,7 +82,7 @@
     },
     "scripts": {
         "post-root-package-install": [
-            "DrevOps\\Composer\\Script\\ScaffoldHandler::postRootPackageInstall"
+            "DrevOps\\composer\\ScaffoldScriptHandler::postRootPackageInstall"
         ]
     }
 }

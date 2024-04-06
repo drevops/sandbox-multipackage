@@ -1,6 +1,6 @@
 <?php
 
-namespace DrevOps\Composer\Script;
+namespace DrevOps\composer;
 
 use Composer\Plugin\PrePoolCreateEvent;
 use Composer\Script\Event;
@@ -30,7 +30,7 @@ use Composer\Script\Event;
  *
  * @see https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold
  */
-class ScaffoldHandler {
+class ScaffoldScriptHandler {
 
   /**
    * DrevOps Scaffold package name.
@@ -244,7 +244,7 @@ class ScaffoldHandler {
     foreach ($packages as $package) {
       if ($package->getName() === static::DREVOPS_SCAFFOLD_NAME) {
         $autoload = $package->getAutoload();
-        unset($autoload['classmap'][array_search('scripts/composer/ScaffoldHandler.php', $autoload['classmap'])]);
+        unset($autoload['classmap'][array_search('scripts/composer/ScaffoldScriptHandler.php', $autoload['classmap'])]);
         $package->setAutoload($autoload);
         $event->getIO()->debug('Removed classmap for ' . $package->getName());
         break;

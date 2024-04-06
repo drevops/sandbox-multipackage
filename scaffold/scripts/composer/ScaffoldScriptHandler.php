@@ -245,6 +245,7 @@ class ScaffoldScriptHandler {
       if ($package->getName() === static::DREVOPS_SCAFFOLD_NAME) {
         $autoload = $package->getAutoload();
         unset($autoload['classmap'][array_search('scripts/composer/ScaffoldScriptHandler.php', $autoload['classmap'])]);
+        unset($autoload['classmap'][array_search('scripts/composer/ScriptHandler.php', $autoload['classmap'])]);
         $package->setAutoload($autoload);
         $event->getIO()->debug('Removed classmap for ' . $package->getName());
         break;

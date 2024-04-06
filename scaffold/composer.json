@@ -1,6 +1,5 @@
 {
     "name": "drevops/scaffold",
-    "version": "1.10.2",
     "authors": [
         {
             "name": "Alex Skrypnyk",
@@ -48,9 +47,9 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {
-        "psr-4": {
-            "DrevOps\\Composer\\Plugin\\Scaffold\\": ".scaffold"
-        }
+        "classmap": [
+            "scripts/composer/ScaffoldHandler.php"
+        ]
     },
     "extra": {
         "drupal-scaffold": {
@@ -82,7 +81,7 @@
     },
     "scripts": {
         "post-root-package-install": [
-            "DrevOps\\Composer\\Plugin\\Scaffold\\Generalizer::process"
+            "DrevOps\\Composer\\Plugin\\Scaffold\\ScaffoldHandler::postRootPackageInstall"
         ]
     }
 }

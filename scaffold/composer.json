@@ -49,6 +49,7 @@
     "prefer-stable": true,
     "autoload": {
         "classmap": [
+            "scripts/composer/ScaffoldGeneralizer.php",
             "scripts/composer/ScaffoldScriptHandler.php",
             "scripts/composer/ScriptHandler.php"
         ]
@@ -86,7 +87,8 @@
             "DrupalProject\\composer\\ScriptHandler::checkComposerVersion"
         ],
         "pre-update-cmd": [
-            "DrupalProject\\composer\\ScriptHandler::checkComposerVersion"
+            "DrupalProject\\composer\\ScriptHandler::checkComposerVersion",
+            "DrevOps\\composer\\ScaffoldScriptHandler::preUpdateCmd"
         ],
         "post-install-cmd": [
             "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
@@ -95,7 +97,7 @@
             "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
         ],
         "post-root-package-install": [
-            "DrevOps\\composer\\ScaffoldScriptHandler::postRootPackageInstall"
+            "DrevOps\\composer\\ScaffoldGeneralizer::generalizeAndRemoveItselfAfterProjectCreate"
         ]
     }
 }

@@ -81,7 +81,7 @@
     },
     "scripts": {
         "post-root-package-install": [
-            "DrevOps\\Composer\\Plugin\\Scaffold\\ScaffoldHandler::postRootPackageInstall"
+            "DrevOps\\Composer\\Script\\ScaffoldHandler::postRootPackageInstall"
         ]
     }
 }

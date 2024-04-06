@@ -1,12 +1,12 @@
 <?php
 
-namespace DrevOps\Composer\Plugin\Scaffold;
+namespace DrevOps\Composer\Script;
 
 use Composer\Plugin\PrePoolCreateEvent;
 use Composer\Script\Event;
 
 /**
- * Composer event callbacks to handle the DrevOps Scaffold package.
+ * Composer event script callbacks to handle the DrevOps Scaffold package.
  *
  * DrevOps Scaffold project is used both as a *project template*, for initial
  * setup with `composer create-project`, and a *dependent package* that provides
@@ -19,10 +19,10 @@ use Composer\Script\Event;
  * so that the DrevOps Scaffold files could be managed by the
  * drupal/core-composer-scaffold plugin. We are using this plugin for managing
  * the scaffold asset files because it is a de-facto standard for Drupal
- * projects and it's configuration mechanism is known to the Drupal community.
+ * projects, and it's configuration mechanism is known to the Drupal community.
  *
  * The event callbacks in this file are used to reset the composer.json to a
- * "generic" state and add some handling of the DrevOps Scaffold depdendency
+ * "generic" state and add some handling of the DrevOps Scaffold dependency
  * package.
  *
  * It is intentionally designed to be lightweight so that it could run without
@@ -41,6 +41,9 @@ class ScaffoldHandler {
 
   /**
    * DrevOps Scaffold version.
+   *
+   * Can be overridden by setting the DREVOPS_SCAFFOLD_VERSION environment
+   * variable.
    *
    * @var string
    */
@@ -61,10 +64,13 @@ class ScaffoldHandler {
    *
    * These files are provided by the DrevOps Scaffold, when it is used as a
    * dependency, so that drupal/core-composer-scaffold plugin can manage them.
-   * These mappings of these files are removed from the consumer project's
+   * These mappings of the files are removed from the consumer project's
    * composer.json.
-   * The consumer project can still add these mappings if they want to prevent
-   * drupal/core-composer-scaffold plugin from updating them.
+   * The consumer project developers can add these mappings manually into their
+   * project if they want to prevent drupal/core-composer-scaffold plugin from
+   * updating them.
+   *
+   * @see https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold
    *
    * @var string[]
    */
@@ -75,8 +81,8 @@ class ScaffoldHandler {
   /**
    * Update the project's composer.json.
    *
-   * We use `post-root-package-install` event to support running
-   * `composer create-project --no-install`.
+   * We use `post-root-package-install` event to support running both
+   * `composer create-project` and `composer create-project --no-install`.
    */
   public static function postRootPackageInstall(Event $event): void {
     $is_install = !in_array('--no-install', $_SERVER['argv']);
@@ -84,51 +90,20 @@ class ScaffoldHandler {
     $path = getcwd() . '/composer.json';
     $json = json_decode(file_get_contents($path), TRUE);
 
-    // Change the project name to a generic value. The current 'name' property
-    // in composer.json is used to distribute the package via the registry.
-    // The consumer project's 'name', 'type' and 'license' in composer.json
-    // should have a generic value.
+    // Change the project properties to generic values.
+    // The current 'name' property in composer.json is used to distribute the
+    // package via the registry. The 'name', 'type' and
+    // 'license' properties in consumer project's composer.json should have
+    // generic values.
     $json['name'] = self::PROJECT_NAME;
     self::arrayUpsert($json, isset($json['description']) ? 'description' : 'name', 'type', 'project');
     self::arrayUpsert($json, 'type', 'license', 'proprietary');
     // The consumer project should not have a 'version' as it is not distributed
     // as a package.
     unset($json['version']);
-    // Remove package authors.
+    // The consumer project's authors are different to this package's authors,
+    // so remove them.
     unset($json['authors']);
-
-    // Add the package itself as a dev dependency to the resulting consumer
-    // project.
-    if ($is_install) {
-      // When running project creation with installation, the addition of the
-      // package to composer.json will not take effect. It must be included
-      // after generating the lock file. To achieve this, we must dynamically
-      // insert a script into the execution flow. This 'scripts' entry will not
-      // appear in the consumer project's composer.json file.
-      $package = $event->getComposer()->getPackage();
-      $scripts = $event->getComposer()->getPackage()->getScripts();
-      $scripts['post-create-project-cmd'][] = __CLASS__ . '::requireScaffold';
-      $package->setScripts($scripts);
-    }
-    else {
-      // When running project creation without installation, we can directly
-      // add to composer.json.
-      $json['require-dev'][static::DREVOPS_SCAFFOLD_NAME] = static::getVersion();
-      $event->getIO()->notice('Added' . static::DREVOPS_SCAFFOLD_NAME . ' as dev dependency with version ' . $json['require-dev'][static::DREVOPS_SCAFFOLD_NAME]);
-    }
-
-    // Composer should not use this package's `require` section to resolve
-    // dependencies, because these dependencies are used only during the project
-    // creation.
-    // We add `pre-update-cmd` to the resulting composer.json to
-    // remove the package from the pool before the update.
-    $json['scripts']['pre-update-cmd'][] = __CLASS__ . '::preUpdateCmd';
-
-    // Remove script that was calling this plugin during project creation.
-    unset($json['scripts']['post-root-package-install'][array_search(__METHOD__, $json['scripts']['post-root-package-install'])]);
-    if (empty($json['scripts']['post-root-package-install'])) {
-      unset($json['scripts']['post-root-package-install']);
-    }
 
     // Remove Scaffold's file mappings. Consumer site's can still add these
     // mappings if they want to prevent Scaffold from updating them.
@@ -141,10 +116,47 @@ class ScaffoldHandler {
       $json['extra']['drupal-scaffold']['allowed-packages'][] = static::DREVOPS_SCAFFOLD_NAME;
     }
 
-    // Preserve format of the 'patches' section.
+    // Special treatment for the 'patches' section to preserve the format.
     if (isset($json['extra']['patches']) && count($json['extra']['patches']) === 0) {
       $json['extra']['patches'] = (object) $json['extra']['patches'];
     }
+
+    // Remove event script used to invoke this script during the project
+    // creation.
+    unset($json['scripts']['post-root-package-install'][array_search(__METHOD__, $json['scripts']['post-root-package-install'])]);
+    if (empty($json['scripts']['post-root-package-install'])) {
+      unset($json['scripts']['post-root-package-install']);
+    }
+
+    // Add the package itself as a dev dependency to the resulting consumer
+    // project.
+    if ($is_install) {
+      // When running project creation with installation, the addition of the
+      // package to composer.json will not take effect as Composer will not
+      // be re-reading the contents of the composer.json during events
+      // processing. So we dynamically insert a script into the in-memory
+      // Composer configuration.
+      $package = $event->getComposer()->getPackage();
+      $scripts = $event->getComposer()->getPackage()->getScripts();
+      $scripts['post-create-project-cmd'][] = __CLASS__ . '::requireScaffold';
+      $package->setScripts($scripts);
+    }
+    else {
+      // When running project creation without installation, we can directly
+      // add to composer.json as the manual installation will be initiated
+      // later.
+      $json['require-dev'][static::DREVOPS_SCAFFOLD_NAME] = static::getVersion();
+      $event->getIO()->notice('Added' . static::DREVOPS_SCAFFOLD_NAME . ' as dev dependency with version ' . $json['require-dev'][static::DREVOPS_SCAFFOLD_NAME]);
+    }
+
+    // When referenced in the consumer project as require-dev, this package's
+    // `require` section should not be used by the Composer to resolve
+    // dependencies, because these dependencies are used only during the project
+    // creation.
+    // We add `pre-update-cmd` event script to the resulting composer.json to
+    // be able to listen to the Composer updates and remove the package itself
+    // from the pool before the update runs.
+    $json['scripts']['pre-update-cmd'][] = __CLASS__ . '::preUpdateCmd';
 
     // Write the updated composer.json file.
     file_put_contents($path, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
@@ -160,7 +172,7 @@ class ScaffoldHandler {
    */
   public static function requireScaffold(Event $event): void {
     $ansi = $event->getIO()->isDecorated() ? '--ansi' : '--no-ansi';
-    $cmd = 'composer require --dev ' . $ansi . ' ' . static::DREVOPS_SCAFFOLD_NAME . ':' . static::getVersion();
+    $cmd = 'composer require --no-interaction --dev ' . $ansi . ' ' . static::DREVOPS_SCAFFOLD_NAME . ':' . static::getVersion();
     passthru($cmd, $status);
     if ($status != 0) {
       throw new \Exception('Command failed with exit code ' . $status);
@@ -169,16 +181,23 @@ class ScaffoldHandler {
 
   /**
    * Callback for 'pre-update-cmd' event.
+   *
+   * Used to dynamically add event scripts to the in-memory Composer
+   * configuration.
    */
   public static function preUpdateCmd(Event $event): void {
     $package = $event->getComposer()->getPackage();
     $scripts = $package->getScripts();
 
+    // Add the pre-pool-create event to remove the Scaffold's package from the
+    // pool.
     $pre_pool_create = __CLASS__ . '::prePoolCreate';
     if (empty($scripts['pre-pool-create']) || !in_array($pre_pool_create, $scripts['pre-pool-create'])) {
       $scripts['pre-pool-create'][] = $pre_pool_create;
     }
 
+    // Add the pre-autoload-dump event to remove the classmap for this script
+    // from the Scaffold's package.
     $pre_autoload_dump = __CLASS__ . '::preAutoloadDump';
     if (empty($scripts['pre-autoload-dump']) || !in_array($pre_autoload_dump, $scripts['pre-autoload-dump'])) {
       $scripts['pre-autoload-dump'][] = $pre_autoload_dump;

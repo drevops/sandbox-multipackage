@@ -114,6 +114,7 @@ class ScaffoldHandler {
       }
       // Add the package itself if it provides drupal-scaffold config.
       $json['extra']['drupal-scaffold']['allowed-packages'][] = static::DREVOPS_SCAFFOLD_NAME;
+      sort($json['extra']['drupal-scaffold']['allowed-packages']);
     }
 
     // Special treatment for the 'patches' section to preserve the format.
@@ -146,6 +147,7 @@ class ScaffoldHandler {
       // add to composer.json as the manual installation will be initiated
       // later.
       $json['require-dev'][static::DREVOPS_SCAFFOLD_NAME] = static::getVersion();
+      ksort($json['require-dev']);
       $event->getIO()->notice('Added' . static::DREVOPS_SCAFFOLD_NAME . ' as dev dependency with version ' . $json['require-dev'][static::DREVOPS_SCAFFOLD_NAME]);
     }
 

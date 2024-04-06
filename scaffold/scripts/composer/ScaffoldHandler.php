@@ -2,32 +2,35 @@
 
 namespace DrevOps\Composer\Plugin\Scaffold;
 
-use Composer\Composer;
-use Composer\IO\IOInterface;
-use Composer\Plugin\PluginInterface;
 use Composer\Plugin\PrePoolCreateEvent;
 use Composer\Script\Event;
 
 /**
- * Composer plugin for making the project generic.
+ * Composer event callbacks to handle the DrevOps Scaffold package.
  *
- * DrevOps Scaffold project is used both as a project template, for initial
- * setup with `composer create-project`, and a dependency package that provides
- * the scaffold files for the future updates.
+ * DrevOps Scaffold project is used both as a *project template*, for initial
+ * setup with `composer create-project`, and a *dependent package* that provides
+ * the scaffold assets files. This approach allows to *maintain*, *distribute*
+ * and *update* the scaffold files from a single source while *preserving
+ * the project structure*.
  *
- * This plugin is only used to "reset" the project to a generic state - remove
- * all the "wiring" added to support `composer create-project` command.
+ * Once the consumer project is created, the DrevOps Scaffold project (the
+ * project where this file is sourced from) is then added as a dev dependency
+ * so that the DrevOps Scaffold files could be managed by the
+ * drupal/core-composer-scaffold plugin. We are using this plugin for managing
+ * the scaffold asset files because it is a de-facto standard for Drupal
+ * projects and it's configuration mechanism is known to the Drupal community.
+ *
+ * The event callbacks in this file are used to reset the composer.json to a
+ * "generic" state and add some handling of the DrevOps Scaffold depdendency
+ * package.
+ *
  * It is intentionally designed to be lightweight so that it could run without
  * installing any dependencies (`composer create --no-install`).
  *
- * It is used only once, right after the project is created, and then it removes
- * itself from the project dependencies. The project itself is then added as
- * a dev dependency so that the DrevOps Scaffold files could be managed by the
- * core-composer-scaffold plugin.
- *
  * @see https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold
  */
-class ScaffoldHandler implements PluginInterface {
+class ScaffoldHandler {
 
   /**
    * DrevOps Scaffold package name.
@@ -46,12 +49,22 @@ class ScaffoldHandler implements PluginInterface {
   /**
    * Generic project name.
    *
+   * This name is used for the consumer project's composer.json. Also, it aligns
+   * with other similar generic values in the DrevOps scaffold.
+   *
    * @var string
    */
   const PROJECT_NAME = 'your_org/your_site';
 
   /**
    * Scaffold file mappings managed by the DrevOps Scaffold.
+   *
+   * These files are provided by the DrevOps Scaffold, when it is used as a
+   * dependency, so that drupal/core-composer-scaffold plugin can manage them.
+   * These mappings of these files are removed from the consumer project's
+   * composer.json.
+   * The consumer project can still add these mappings if they want to prevent
+   * drupal/core-composer-scaffold plugin from updating them.
    *
    * @var string[]
    */
@@ -60,25 +73,10 @@ class ScaffoldHandler implements PluginInterface {
   ];
 
   /**
-   * {@inheritdoc}
-   */
-  public function activate(Composer $composer, IOInterface $io) {
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function deactivate(Composer $composer, IOInterface $io) {
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function uninstall(Composer $composer, IOInterface $io) {
-  }
-
-  /**
-   * Update the project root package.
+   * Update the project's composer.json.
+   *
+   * We use `post-root-package-install` event to support running
+   * `composer create-project --no-install`.
    */
   public static function postRootPackageInstall(Event $event): void {
     $is_install = !in_array('--no-install', $_SERVER['argv']);
@@ -86,35 +84,40 @@ class ScaffoldHandler implements PluginInterface {
     $path = getcwd() . '/composer.json';
     $json = json_decode(file_get_contents($path), TRUE);
 
-    // Change the project name to a generic value. The `drevops/scaffold` name
-    // was used to distribute the scaffold itself as a package. The consumer
-    // site's 'name', 'type' and 'license' in composer.json should have a
-    // generic value.
+    // Change the project name to a generic value. The current 'name' property
+    // in composer.json is used to distribute the package via the registry.
+    // The consumer project's 'name', 'type' and 'license' in composer.json
+    // should have a generic value.
     $json['name'] = self::PROJECT_NAME;
     self::arrayUpsert($json, isset($json['description']) ? 'description' : 'name', 'type', 'project');
     self::arrayUpsert($json, 'type', 'license', 'proprietary');
+    // The consumer project should not have a 'version' as it is not distributed
+    // as a package.
     unset($json['version']);
+    // Remove package authors.
     unset($json['authors']);
 
-    // Add the package itself as a dev dependency.
+    // Add the package itself as a dev dependency to the resulting consumer
+    // project.
     if ($is_install) {
-      // The addition of the package to `composer.json` will not take effect
-      // during the creation of the project. It must be included after
-      // generating the lock file. To achieve this, we must dynamically insert
-      // a script into the execution flow. This script will not appear in the
-      // `composer.json` file.
+      // When running project creation with installation, the addition of the
+      // package to composer.json will not take effect. It must be included
+      // after generating the lock file. To achieve this, we must dynamically
+      // insert a script into the execution flow. This 'scripts' entry will not
+      // appear in the consumer project's composer.json file.
       $package = $event->getComposer()->getPackage();
       $scripts = $event->getComposer()->getPackage()->getScripts();
       $scripts['post-create-project-cmd'][] = __CLASS__ . '::requireScaffold';
       $package->setScripts($scripts);
     }
     else {
-      // Add to composer.json directly if not running the installation.
+      // When running project creation without installation, we can directly
+      // add to composer.json.
       $json['require-dev'][static::DREVOPS_SCAFFOLD_NAME] = static::getVersion();
       $event->getIO()->notice('Added' . static::DREVOPS_SCAFFOLD_NAME . ' as dev dependency with version ' . $json['require-dev'][static::DREVOPS_SCAFFOLD_NAME]);
     }
 
-    // Composer should not use this plugin's `require` section to resolve
+    // Composer should not use this package's `require` section to resolve
     // dependencies, because these dependencies are used only during the project
     // creation.
     // We add `pre-update-cmd` to the resulting composer.json to

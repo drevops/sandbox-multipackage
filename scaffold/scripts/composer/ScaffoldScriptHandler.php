@@ -22,17 +22,13 @@ class ScaffoldScriptHandler {
 
     // Add the pre-pool-create event to remove the Scaffold's package from the
     // pool.
-    $pre_pool_create = __CLASS__ . '::prePoolCreate';
-    if (empty($scripts['pre-pool-create']) || !in_array($pre_pool_create, $scripts['pre-pool-create'])) {
-      $scripts['pre-pool-create'][] = $pre_pool_create;
-    }
+    $scripts['pre-pool-create'][] = __CLASS__ . '::prePoolCreate';;
+    $scripts['pre-pool-create'] = array_unique($scripts['pre-pool-create']);
 
     // Add the pre-autoload-dump event to remove the classmap for this script
     // from the Scaffold's package.
-    $pre_autoload_dump = __CLASS__ . '::preAutoloadDump';
-    if (empty($scripts['pre-autoload-dump']) || !in_array($pre_autoload_dump, $scripts['pre-autoload-dump'])) {
-      $scripts['pre-autoload-dump'][] = $pre_autoload_dump;
-    }
+    $scripts['pre-autoload-dump'][] = __CLASS__ . '::preAutoloadDump';;
+    $scripts['pre-autoload-dump'] = array_unique($scripts['pre-autoload-dump']);
 
     $package->setScripts($scripts);
   }

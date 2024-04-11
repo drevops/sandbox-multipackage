@@ -21,12 +21,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: /tmp/composer-cache
-          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -34,13 +28,16 @@ jobs:
 
       - name: Install dependencies
         run: composer install
+        working-directory: scaffold
 
       - name: Check coding standards
         run: composer lint
+        working-directory: scaffold
         continue-on-error: ${{ vars.CI_LINT_IGNORE_FAILURE == '1' }}
 
       - name: Run tests
         run: XDEBUG_MODE=coverage composer test
+        working-directory: scaffold
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 
       - name: Upload coverage report as an artifact

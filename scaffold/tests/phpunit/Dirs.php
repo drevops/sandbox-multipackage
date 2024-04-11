@@ -78,16 +78,15 @@ class Dirs {
     $this->fs->mirror($root . '/.circleci', $this->repo . '/.circleci');
     $this->fs->copy($root . '/myfile1.txt', $this->repo . '/myfile1.txt');
 
-    // @todo Refactor temp adjustments below.
+    // Add the local repository to the composer.json file.
     $dstJson = json_decode(file_get_contents($this->repo . '/composer.json'), TRUE);
-    unset($dstJson['repositories'][0]);
-    unset($dstJson['require-dev']['drevops/customizer']);
-
-    // Override the dir for the scaffold. This will later need to be
-    // with an addition of the entry to `repositories` array once it is removed
-    // from the `composer.json`.
-    $dstJson['repositories'][1]['url'] = $this->repo;
-
+    $dstJson['repositories'][] = [
+      'type' => 'path',
+      'url' => $this->repo,
+      'options' => [
+        'symlink' => FALSE,
+      ],
+    ];
     file_put_contents($this->repo . '/composer.json', json_encode($dstJson, JSON_PRETTY_PRINT));
   }
 

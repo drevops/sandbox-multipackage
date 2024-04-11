@@ -6,7 +6,7 @@ use DrevOps\composer\ScaffoldGeneralizer;
 use DrevOps\composer\ScaffoldScriptHandler;
 
 /**
- *
+ * @coversDefaultClass DrevOps\composer\ScaffoldGeneralizer
  */
 class ScaffoldCreateProjectTest extends ScaffoldTestCase {
 

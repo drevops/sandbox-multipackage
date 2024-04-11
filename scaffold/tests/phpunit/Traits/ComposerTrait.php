@@ -6,9 +6,12 @@ use Composer\Console\Application;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 
+/**
+ *
+ */
 trait ComposerTrait {
 
-  protected function composerCreateProject(array|string $args = NULL) {
+  protected function composerCreateProject(array|string $args = NULL): string {
     $args = $args ?? '';
     $args = is_array($args) ? $args : [$args];
     $args[] = $this->dirs->sut;
@@ -22,13 +25,17 @@ trait ComposerTrait {
    *
    * @param string $cmd
    *   The Composer command to execute (escaped as required)
-   * @param string $cwd
+   * @param null $cwd
    *   The current working directory to run the command from.
+   * @param array $env
+   *   Environment variables to define for the subprocess.
    *
    * @return string
    *   Standard output and standard error from the command.
+   *
+   * @throws \Exception
    */
-  public function composerRun($cmd, $cwd = NULL, $env = []) {
+  public function composerRun($cmd, $cwd = NULL, $env = []): string {
     $cwd = $cwd ?? $this->dirs->build;
 
     $env += [
@@ -41,8 +48,7 @@ trait ComposerTrait {
 
     $input = new StringInput($cmd);
     $output = new BufferedOutput();
-    //    $output->setVerbosity(ConsoleOutput::VERBOSITY_QUIET);
-
+    // $output->setVerbosity(ConsoleOutput::VERBOSITY_QUIET);
     $application = new Application();
     $application->setAutoExit(FALSE);
 
@@ -52,7 +58,7 @@ trait ComposerTrait {
     $this->envReset();
 
     if ($code != 0) {
-      throw new \Exception("Fixtures::composerRun failed to set up fixtures.\n\nCommand: '{$cmd}'\nExit code: {$code}\nOutput: \n\n$output");
+      throw new \Exception("Fixtures::composerRun failed to set up fixtures.\n\nCommand: '{$cmd}'\nExit code: {$code}\nOutput: \n\n{$output}");
     }
 
     return $output;

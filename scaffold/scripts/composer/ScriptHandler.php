@@ -20,7 +20,7 @@ use Symfony\Component\Filesystem\Path;
 
 class ScriptHandler {
 
-  public static function createRequiredFiles(Event $event) {
+  public static function createRequiredFiles(Event $event): void {
    // Noop
   }
 
@@ -38,7 +38,7 @@ class ScriptHandler {
    *
    * @see https://github.com/composer/composer/pull/5035
    */
-  public static function checkComposerVersion(Event $event) {
+  public static function checkComposerVersion(Event $event): void {
     $composer = $event->getComposer();
     $io = $event->getIO();
 
@@ -46,7 +46,7 @@ class ScriptHandler {
 
     // The dev-channel of composer uses the git revision as version number,
     // try to the branch alias instead.
-    if (preg_match('/^[0-9a-f]{40}$/i', $version)) {
+    if (preg_match('/^[0-9a-f]{40}$/i', (string) $version)) {
       $version = $composer::BRANCH_ALIAS_VERSION;
     }
 

@@ -156,12 +156,12 @@ class ScaffoldGeneralizer {
     // Remove references to this script.
     // Remove event script used to invoke this script during the project
     // creation.
-    unset($json['scripts']['post-root-package-install'][array_search(__METHOD__, $json['scripts']['post-root-package-install'])]);
+    unset($json['scripts']['post-root-package-install'][array_search(__METHOD__, $json['scripts']['post-root-package-install'], true)]);
     if (empty($json['scripts']['post-root-package-install'])) {
       unset($json['scripts']['post-root-package-install']);
     }
     // Remove the classmap for this script from the autoload section.
-    unset($json['autoload']['classmap'][array_search('scripts/composer/ScaffoldGeneralizer.php', $json['autoload']['classmap'])]);
+    unset($json['autoload']['classmap'][array_search('scripts/composer/ScaffoldGeneralizer.php', $json['autoload']['classmap'], true)]);
     $json['autoload']['classmap'] = array_values($json['autoload']['classmap']);
     // Remove the script file.
     if (!$is_install) {
@@ -195,7 +195,7 @@ class ScaffoldGeneralizer {
     $fs->unlink(getcwd() . '/scripts/composer/ScaffoldGeneralizer.php');
   }
 
-  protected static function isInstall(Event $event) {
+  protected static function isInstall(Event $event): bool {
     $io = $event->getIO();
 
     $reflectionIo = new \ReflectionObject($io);
@@ -225,7 +225,7 @@ class ScaffoldGeneralizer {
    */
   protected static function arrayUpsert(&$array, $after, $key, $value): void {
     if (array_key_exists($after, $array)) {
-      $position = array_search($after, array_keys($array)) + 1;
+      $position = array_search($after, array_keys($array), true) + 1;
       $array = array_slice($array, 0, $position, TRUE)
         + [$key => $value]
         + array_slice($array, $position, NULL, TRUE);

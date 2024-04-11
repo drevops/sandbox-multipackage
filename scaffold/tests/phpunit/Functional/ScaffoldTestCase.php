@@ -13,7 +13,10 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\TestStatus\Failure;
 use Symfony\Component\Filesystem\Filesystem;
 
-class ScaffoldTest extends TestCase {
+/**
+ *
+ */
+class ScaffoldTestCase extends TestCase {
 
   use CmdTrait;
   use ComposerTrait;
@@ -59,7 +62,8 @@ class ScaffoldTest extends TestCase {
   protected function onNotSuccessfulTest(\Throwable $t): never {
     $this->dirs->printInfo();
 
-    parent::onNotSuccessfulTest($t); // Rethrow the exception to allow the test to fail normally.
+    // Rethrow the exception to allow the test to fail normally.
+    parent::onNotSuccessfulTest($t);
   }
 
   public function hasFailed(): bool {

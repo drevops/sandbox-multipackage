@@ -6,6 +6,9 @@ namespace DrevOps\Scaffold\Tests\Traits;
 
 use Symfony\Component\Process\Process;
 
+/**
+ *
+ */
 trait CmdTrait {
 
   /**
@@ -21,7 +24,7 @@ trait CmdTrait {
    * @return string
    *   Standard output from the command
    */
-  protected function cmdRun($cmd, $cwd, array $env = []) {
+  protected function cmdRun($cmd, $cwd, array $env = []): string {
     $env += $env + ['PATH' => getenv('PATH'), 'HOME' => getenv('HOME')];
 
     $process = Process::fromShellCommandline($cmd, $cwd, $env);

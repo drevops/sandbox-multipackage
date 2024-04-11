@@ -5,12 +5,15 @@ namespace DrevOps\Scaffold\Tests;
 use DrevOps\Scaffold\Tests\Traits\FileTrait;
 use Symfony\Component\Filesystem\Filesystem;
 
+/**
+ *
+ */
 class Dirs {
 
   use FileTrait;
 
   /**
-   * Directory where a copy of the DrevOps Scaffold (this) repository is located.
+   * Directory where a copy of the DrevOps Scaffold repository is located.
    *
    * This allows to isolate the test from this repository files and prevent
    * their accidental removal.
@@ -38,34 +41,32 @@ class Dirs {
 
   /**
    * The file system.
-   *
-   * @var \Symfony\Component\Filesystem\Filesystem
    */
-  protected $fs;
+  protected Filesystem $fs;
 
   public function __construct() {
     $this->fs = new Filesystem();
   }
 
-  public function initLocations() {
+  public function initLocations(): void {
     $this->build = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'drevops-scaffold-' . microtime(TRUE);
-    $this->sut = "$this->build/sut";
-    $this->repo = "$this->build/local_repo";
+    $this->sut = $this->build . '/sut';
+    $this->repo = $this->build . '/local_repo';
 
     $this->fs->mkdir($this->build);
 
     $this->prepareLocalRepo();
   }
 
-  public function deleteLocations() {
+  public function deleteLocations(): void {
     $this->fs->remove($this->build);
   }
 
-  public function printInfo() {
+  public function printInfo(): void {
     $lines[] = '-- LOCATIONS --';
-    $lines[] = "Build      : {$this->build}";
-    $lines[] = "SUT        : {$this->sut}";
-    $lines[] = "Local repo : {$this->repo}";
+    $lines[] = 'Build      : ' . $this->build;
+    $lines[] = 'SUT        : ' . $this->sut;
+    $lines[] = 'Local repo : ' . $this->repo;
 
     fwrite(STDERR, PHP_EOL . implode(PHP_EOL, $lines) . PHP_EOL);
   }

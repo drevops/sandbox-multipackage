@@ -3,7 +3,10 @@
     <description>Custom PHPCS standard.</description>
 
     <!-- Coding standard. -->
-    <rule ref="Drupal"/>
+    <rule ref="Drupal">
+        <exclude name="Drupal.Commenting.DocComment.Empty"/>
+        <exclude name="Drupal.Commenting.DocComment.MissingShort"/>
+    </rule>
 
     <!-- Show sniff codes in all reports -->
     <arg value="s"/>

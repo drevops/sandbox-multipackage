@@ -101,14 +101,13 @@
             "DrevOps\\composer\\ScaffoldGeneralizer::generalizeAndRemoveItselfAfterProjectCreate"
         ],
         "lint": [
-            "cp php-script php-script.php && phpcs && rm php-script.php",
-            "phpmd --exclude vendor,vendor-bin,node_modules . text phpmd.xml",
+            "phpcs",
             "phpstan",
             "rector --clear-cache --dry-run"
         ],
         "lint-fix": [
-            "rector --clear-cache",
-            "cp php-script php-script.php && phpcbf && rm php-script.php"
+            "phpcbf",
+            "rector --clear-cache"
         ],
         "test": "if [ \"${XDEBUG_MODE}\" = 'coverage' ]; then phpunit; else phpunit --no-coverage; fi"
     }

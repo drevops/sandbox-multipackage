@@ -64,9 +64,9 @@ class ScaffoldScriptHandler {
     foreach ($packages as $package) {
       if ($package->getName() === 'drevops/scaffold') {
         $autoload = $package->getAutoload();
-        unset($autoload['classmap'][array_search('scripts/composer/ScaffoldScriptHandler.php', $autoload['classmap'])]);
-        unset($autoload['classmap'][array_search('scripts/composer/ScaffoldGeneralizer.php', $autoload['classmap'])]);
-        unset($autoload['classmap'][array_search('scripts/composer/ScriptHandler.php', $autoload['classmap'])]);
+        unset($autoload['classmap'][array_search('scripts/composer/ScaffoldScriptHandler.php', $autoload['classmap'], true)]);
+        unset($autoload['classmap'][array_search('scripts/composer/ScaffoldGeneralizer.php', $autoload['classmap'], true)]);
+        unset($autoload['classmap'][array_search('scripts/composer/ScriptHandler.php', $autoload['classmap'], true)]);
         $package->setAutoload($autoload);
         $event->getIO()->debug('Removed classmap for ' . $package->getName());
         break;

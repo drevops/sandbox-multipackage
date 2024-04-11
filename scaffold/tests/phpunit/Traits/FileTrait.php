@@ -4,9 +4,12 @@ namespace DrevOps\Scaffold\Tests\Traits;
 
 use Symfony\Component\Filesystem\Filesystem;
 
+/**
+ *
+ */
 trait FileTrait {
 
-  public function fileFindDir($file, $start = NULL) {
+  public function fileFindDir(string $file, $start = NULL) {
     if (empty($start)) {
       $start = dirname(__FILE__);
     }
@@ -20,10 +23,10 @@ trait FileTrait {
       if ($fs->exists($path)) {
         return $current;
       }
-      $current = dirname($current);
+      $current = dirname((string) $current);
     }
 
-    throw new \RuntimeException("File not found: $file");
+    throw new \RuntimeException('File not found: ' . $file);
   }
 
 }

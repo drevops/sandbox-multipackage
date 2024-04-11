@@ -93,7 +93,7 @@ class ScaffoldGeneralizer {
    * `composer create-project` and `composer create-project --no-install`.
    */
   public static function generalizeAndRemoveItselfAfterProjectCreate(Event $event): void {
-    $is_install = !in_array('--no-install', $_SERVER['argv']);
+    $is_install = static::isInstall($event);
 
     $path = getcwd() . '/composer.json';
     $json = json_decode(file_get_contents($path), TRUE);
@@ -166,7 +166,7 @@ class ScaffoldGeneralizer {
     // Remove the script file.
     if (!$is_install) {
       $fs = new Filesystem();
-      $fs->unlink(__FILE__);
+      $fs->unlink(getcwd() . '/scripts/composer/ScaffoldGeneralizer.php');
     }
 
     // Write the updated composer.json file.
@@ -183,7 +183,8 @@ class ScaffoldGeneralizer {
    */
   public static function postCreateProjectCmd(Event $event): void {
     $ansi = $event->getIO()->isDecorated() ? '--ansi' : '--no-ansi';
-    $cmd = 'composer require --no-interaction --dev ' . $ansi . ' ' . static::DREVOPS_SCAFFOLD_NAME . ':' . static::getVersion();
+    $quiet = $event->getIO()->isVerbose() ? '' : '--quiet';
+    $cmd = 'composer require --no-interaction --dev ' . $ansi . ' ' . $quiet . ' ' . static::DREVOPS_SCAFFOLD_NAME . ':' . static::getVersion();
     passthru($cmd, $status);
     if ($status != 0) {
       throw new \Exception('Command failed with exit code ' . $status);
@@ -191,7 +192,19 @@ class ScaffoldGeneralizer {
 
     // Remove the script file.
     $fs = new Filesystem();
-    $fs->unlink(__FILE__);
+    $fs->unlink(getcwd() . '/scripts/composer/ScaffoldGeneralizer.php');
+  }
+
+  protected static function isInstall(Event $event) {
+    $io = $event->getIO();
+
+    $reflectionIo = new \ReflectionObject($io);
+    $inputProperty = $reflectionIo->getProperty('input');
+    $inputProperty->setAccessible(TRUE);
+    /** @var \Symfony\Component\Console\Input\StringInput $input */
+    $input = $inputProperty->getValue($io);
+
+    return !$input->getOption('no-install');
   }
 
   /**

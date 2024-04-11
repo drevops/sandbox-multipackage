@@ -40,7 +40,18 @@
         "drupal/core-composer-scaffold": "11.x-dev"
     },
     "require-dev": {
-        "drevops/customizer": "@dev"
+        "composer/composer": "^2.7",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1",
+        "drevops/customizer": "@dev",
+        "drupal/coder": "^8.3",
+        "helmich/phpunit-json-assert": "^3.5",
+        "mikey179/vfsstream": "^1.6",
+        "opis/closure": "^3.6",
+        "phpmd/phpmd": "^2.13",
+        "phpstan/phpstan": "^1.10",
+        "phpunit/phpunit": "^10",
+        "rector/rector": "^1.0.0",
+        "symfony/filesystem": "^7.0"
     },
     "conflict": {
         "drupal/drupal": "*"
@@ -53,6 +64,11 @@
             "scripts/composer/ScaffoldScriptHandler.php",
             "scripts/composer/ScriptHandler.php"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DrevOps\\Scaffold\\Tests\\": "tests/phpunit"
+        }
     },
     "extra": {
         "drupal-scaffold": {
@@ -78,6 +94,7 @@
     },
     "config": {
         "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
             "drupal/core-composer-scaffold": true,
             "drevops/customizer": true
         }

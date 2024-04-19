@@ -9,7 +9,7 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 trait FileTrait {
 
-  public function fileFindDir(string $file, $start = NULL) {
+  public function fileFindDir(string $file, ?string $start = NULL): string {
     if (empty($start)) {
       $start = dirname(__FILE__);
     }
@@ -23,7 +23,7 @@ trait FileTrait {
       if ($fs->exists($path)) {
         return $current;
       }
-      $current = dirname((string) $current);
+      $current = dirname($current);
     }
 
     throw new \RuntimeException('File not found: ' . $file);

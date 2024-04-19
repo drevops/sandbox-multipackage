@@ -71,7 +71,7 @@ class Dirs {
     fwrite(STDERR, PHP_EOL . implode(PHP_EOL, $lines) . PHP_EOL);
   }
 
-  protected function prepareLocalRepo() {
+  protected function prepareLocalRepo(): void {
     $root = $this->fileFindDir('composer.json');
 
     $this->fs->copy($root . '/composer.json', $this->repo . '/composer.json');
@@ -80,15 +80,25 @@ class Dirs {
     $this->fs->copy($root . '/myfile1.txt', $this->repo . '/myfile1.txt');
 
     // Add the local repository to the composer.json file.
-    $dstJson = json_decode(file_get_contents($this->repo . '/composer.json'), TRUE);
-    $dstJson['repositories'][] = [
+    $composerjson = file_get_contents($this->repo . '/composer.json');
+    if ($composerjson === FALSE) {
+      throw new \Exception('Failed to read the local composer.json file.');
+    }
+
+    /** @var array $dst_json */
+    $dst_json = json_decode($composerjson, TRUE);
+    if (!$dst_json) {
+      throw new \Exception('Failed to decode the local composer.json file.');
+    }
+
+    $dst_json['repositories'][] = [
       'type' => 'path',
       'url' => $this->repo,
       'options' => [
         'symlink' => FALSE,
       ],
     ];
-    file_put_contents($this->repo . '/composer.json', json_encode($dstJson, JSON_PRETTY_PRINT));
+    file_put_contents($this->repo . '/composer.json', json_encode($dst_json, JSON_PRETTY_PRINT));
   }
 
 }

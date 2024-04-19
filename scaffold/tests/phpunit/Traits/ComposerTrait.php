@@ -25,7 +25,7 @@ trait ComposerTrait {
    *
    * @param string $cmd
    *   The Composer command to execute (escaped as required)
-   * @param null $cwd
+   * @param string|null $cwd
    *   The current working directory to run the command from.
    * @param array $env
    *   Environment variables to define for the subprocess.
@@ -35,8 +35,8 @@ trait ComposerTrait {
    *
    * @throws \Exception
    */
-  public function composerRun($cmd, $cwd = NULL, $env = []): string {
-    $cwd = $cwd ?? $this->dirs->build;
+  public function composerRun(string $cmd, ?string $cwd = NULL, array $env = []): string {
+    $cwd = $cwd ?: $this->dirs->build;
 
     $env += [
       'DREVOPS_SCAFFOLD_VERSION' => '@dev',
@@ -64,11 +64,17 @@ trait ComposerTrait {
     return $output;
   }
 
-  protected function composerReadJson($path = NULL) {
-    $path = $path ?? $this->dirs->sut . '/composer.json';
+  protected function composerReadJson(?string $path = NULL): array {
+    $path = $path ?: $this->dirs->sut . '/composer.json';
     $this->assertFileExists($path);
 
-    return json_decode(file_get_contents($path), TRUE);
+    $composerjson = file_get_contents($path);
+    $this->assertIsString($composerjson);
+
+    $data = json_decode($composerjson, TRUE);
+    $this->assertIsArray($data);
+
+    return $data;
   }
 
 }

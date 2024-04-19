@@ -63,7 +63,7 @@ trait EnvTrait {
   /**
    * Check if an environment variable is not set.
    */
-  public static function envIsUnset($name): bool {
+  public static function envIsUnset(string $name): bool {
     return getenv($name) === FALSE;
   }
 

@@ -182,12 +182,14 @@ class ScaffoldGeneralizer {
    * Require the DrevOps Scaffold package.
    */
   public static function postCreateProjectCmd(Event $event): void {
+    $version = static::getVersion();
+    $event->getIO()->write(sprintf('<info>Adding the DrevOps Scaffold at version "%s" as a development dependency.</info>', $version));
+
     $ansi = $event->getIO()->isDecorated() ? '--ansi' : '--no-ansi';
-    $quiet = $event->getIO()->isVerbose() ? '' : '--quiet';
-    $cmd = 'composer require --no-interaction --dev ' . $ansi . ' ' . $quiet . ' ' . static::DREVOPS_SCAFFOLD_NAME . ':' . static::getVersion();
-    passthru($cmd, $status);
-    if ($status != 0) {
-      throw new \Exception('Command failed with exit code ' . $status);
+    $cmd = 'composer require --no-interaction --dev ' . $ansi . ' ' . static::DREVOPS_SCAFFOLD_NAME . ':' . $version . ' 2>&1';
+    exec($cmd, $output, $result_code);
+    if ($result_code != 0) {
+      throw new \Exception(sprintf('Command failed with exit code %s and the following output: %s', $result_code, PHP_EOL . implode(PHP_EOL, $output)));
     }
 
     // Remove the script file.

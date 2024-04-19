@@ -156,12 +156,12 @@ class ScaffoldGeneralizer {
     // Remove references to this script.
     // Remove event script used to invoke this script during the project
     // creation.
-    unset($json['scripts']['post-root-package-install'][array_search(__METHOD__, $json['scripts']['post-root-package-install'], true)]);
+    unset($json['scripts']['post-root-package-install'][array_search(__METHOD__, $json['scripts']['post-root-package-install'], TRUE)]);
     if (empty($json['scripts']['post-root-package-install'])) {
       unset($json['scripts']['post-root-package-install']);
     }
     // Remove the classmap for this script from the autoload section.
-    unset($json['autoload']['classmap'][array_search('scripts/composer/ScaffoldGeneralizer.php', $json['autoload']['classmap'], true)]);
+    unset($json['autoload']['classmap'][array_search('scripts/composer/ScaffoldGeneralizer.php', $json['autoload']['classmap'], TRUE)]);
     $json['autoload']['classmap'] = array_values($json['autoload']['classmap']);
     // Remove the script file.
     if (!$is_install) {
@@ -195,14 +195,17 @@ class ScaffoldGeneralizer {
     $fs->unlink(getcwd() . '/scripts/composer/ScaffoldGeneralizer.php');
   }
 
+  /**
+   * Check if dependencies are being installed.
+   */
   protected static function isInstall(Event $event): bool {
     $io = $event->getIO();
 
-    $reflectionIo = new \ReflectionObject($io);
-    $inputProperty = $reflectionIo->getProperty('input');
-    $inputProperty->setAccessible(TRUE);
+    $reflection = new \ReflectionObject($io);
+    $property = $reflection->getProperty('input');
+    $property->setAccessible(TRUE);
     /** @var \Symfony\Component\Console\Input\StringInput $input */
-    $input = $inputProperty->getValue($io);
+    $input = $property->getValue($io);
 
     return !$input->getOption('no-install');
   }
@@ -225,7 +228,7 @@ class ScaffoldGeneralizer {
    */
   protected static function arrayUpsert(&$array, $after, $key, $value): void {
     if (array_key_exists($after, $array)) {
-      $position = array_search($after, array_keys($array), true) + 1;
+      $position = array_search($after, array_keys($array), TRUE) + 1;
       $array = array_slice($array, 0, $position, TRUE)
         + [$key => $value]
         + array_slice($array, $position, NULL, TRUE);
